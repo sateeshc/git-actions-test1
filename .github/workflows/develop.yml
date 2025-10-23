@@ -14,5 +14,5 @@ jobs:
   call-workflow-passing-data:
     uses: sateeshc/cicd/.github/workflows/develop.yml@main
     with:
-      environment: dev
+      environment-name: dev
     secrets: inherit
