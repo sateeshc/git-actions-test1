@@ -15,10 +15,10 @@ jobs:
     uses: sschalasani/ci-cd-tools/.github/workflows/develop.yml@develop
     with:
       config-path: ".github/labeler.yml"
-      APP_NAME: ${{ env.APP_NAME }}
-      ENV: ${{ env.ENV_NAME }}
-      DEPLOY_TARGET: ${{ env.DEPLOY_TARGET }}
-      DEPLOY_TARGET_TYPE: ${{ env.DEPLOY_TARGET_TYPE }}
+      APP_NAME: my-app
+      ENV: dev
+      DEPLOY_TARGET: cloudhub
+      DEPLOY_TARGET_TYPE: mule
     secrets:
       NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
       NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
