@@ -12,7 +12,7 @@ on:
 
 jobs:
   call-workflow-passing-data:
-    uses: sateeshc/ci-cd/.github/workflows/develop.yml@main
+    uses: sateeshc/cicd/.github/workflows/develop.yml@main
     with:
       environment: dev
     secrets: inherit
