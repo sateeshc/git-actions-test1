@@ -14,11 +14,6 @@ jobs:
   call-workflow-passing-data:
     uses: sschalasani/ci-cd-tools/.github/workflows/develop.yml@develop
     with:
-      config-path: ".github/labeler.yml"
-      APP_NAME: my-app
-      ENV: dev
-      DEPLOY_TARGET: cloudhub
-      DEPLOY_TARGET_TYPE: mule
       environment: dev
     secrets:
       NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
