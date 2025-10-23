@@ -19,6 +19,7 @@ jobs:
       ENV: dev
       DEPLOY_TARGET: cloudhub
       DEPLOY_TARGET_TYPE: mule
+      environment: dev
     secrets:
       NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
       NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
