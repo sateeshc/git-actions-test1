@@ -29,7 +29,7 @@ jobs:
   call-workflow-passing-data:
     runs-on: ubuntu-latest
    # if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '' && needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}    
-    if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '' && needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}    
+    if: ${{ needs.Determine-changes.outputs.run-comps-matrix != 'test' && needs.Determine-changes.outputs.run-comps-matrix != '{"include": []}' }}    
     strategy:
       matrix: ${{ fromJson(needs.Determine-changes.outputs.run-comps-matrix) }}
     steps:
