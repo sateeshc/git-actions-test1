@@ -11,7 +11,7 @@ env:
 
 jobs:
   Determine-changes:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     outputs:
       run-comps-matrix: ${{steps.outputs.outputs.run_comps_matrix }}
 
@@ -27,7 +27,7 @@ jobs:
           echo "run_comps_matrix=$run_comps_matrix"
           echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
   call-workflow-passing-data:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '[]' }}
     strategy:
       matrix: ${{ fromJson(needs.Determine-changes.outputs.run-comps-matrix) }}
