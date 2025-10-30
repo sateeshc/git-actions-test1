@@ -22,14 +22,14 @@ jobs:
         run: |
 
 
-          run_comps_matrix="{\"include\": ["
+          run_comps_matrix="{\"include\":["
           run_comps_matrix+="]}"
           echo "run_comps_matrix=$run_comps_matrix"
           echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
   call-workflow-passing-data:
     runs-on: ubuntu-latest
    # if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '' && needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}    
-    if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '{"include": []}' }}    
+    if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}  
     strategy:
       matrix: ${{ fromJson(needs.Determine-changes.outputs.run-comps-matrix) }}
     steps:
