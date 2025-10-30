@@ -13,29 +13,27 @@ jobs:
   Determine-changes:
     runs-on: ubuntu-latest
     outputs:
-      run-comps-matrix: ${{ steps.outputs.outputs }}
+      run-comps-matrix: ${{steps.outputs.outputs.run_comps_matrix }}
 
     steps:
-      - name: Generate matrix
-        id: outputs
+      - id: outputs
         env:
           _APP_COMPONENTS: ${{ env.app-components }}
         run: |
-          # Example: create a matrix with one component
-          run_comps_matrix='{"include":[{"component":"app1"}]}'
+
+
+          run_comps_matrix="{\"include\": ["
+          run_comps_matrix+="]}"
           echo "run_comps_matrix=$run_comps_matrix"
           echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
-
   call-workflow-passing-data:
-    needs: Determine-changes
     runs-on: ubuntu-latest
     if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '[]' }}
     strategy:
       matrix: ${{ fromJson(needs.Determine-changes.outputs.run-comps-matrix) }}
     steps:
-      - name: Echo app components
+      - name:
         env:
           _APP_COMPONENTS: ${{ env.app-components }}
         run: |
-          echo "Running for component: ${{ matrix.component }}"
-          echo "All components: $_APP_COMPONENTS"
+          echo "$_APP_COMPONENTS"
