@@ -83,9 +83,9 @@ jobs:
          anypoint-application-name: "${{ matrix.component-name }}-dev-v1"
          project-root: "${{ matrix.component-name }}"
       run: |
-         echo "Building the project $project-root"
-         echo "$anypoint-application-name"
-         echo "$project-root"
+         echo "Building the project ${project-root}"
+         echo "${anypoint-application-name}"
+         echo "${project-root}"
 
 
 
