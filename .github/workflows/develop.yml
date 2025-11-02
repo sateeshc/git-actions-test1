@@ -67,6 +67,7 @@ jobs:
            echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
 
   Build-and-Deploy:
+    runs-on: arc
     needs: Determine-changes
     permissions:
       id-token: write
