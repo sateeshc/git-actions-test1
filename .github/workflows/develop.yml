@@ -55,7 +55,7 @@ jobs:
              fi
            done
            # Trim trailing comma (if any) and close JSON
-           run_comps_matrix="${run_comps_matrix%,}]"
+           run_comps_matrix="${run_comps_matrix%,}]}"
 
            # Emit "empty" when there are no components
            if [[ "$run_comps_matrix" == '{"include":[]}' ]]; then
