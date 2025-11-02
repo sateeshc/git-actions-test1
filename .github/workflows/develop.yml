@@ -4,9 +4,9 @@ run-name: build-and-deploy-to-dev (${{ github.event.workflow_run.head_branch || 
 permissions: write-all
 
 on:
-
   push:
     branches:
+      - develop
       - dev
   workflow_dispatch:
     inputs:
@@ -20,7 +20,7 @@ env:
 
 jobs:
   Determine-changes:
-    runs-on: arc
+    runs-on: ubuntu-latest
     outputs:
       run-comps-matrix: ${{ steps.outputs.outputs.run_comps_matrix }}
 
@@ -67,7 +67,7 @@ jobs:
            echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
 
   Build-and-Deploy:
-    runs-on: arc
+    runs-on: ubuntu-latest
     needs: Determine-changes
     permissions:
       id-token: write
