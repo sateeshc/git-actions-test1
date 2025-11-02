@@ -59,11 +59,16 @@ jobs:
            echo $run_comps_matrix
 
            # Emit "empty" when there are no components
-           if [[ "$run_comps_matrix" == '{"include":[]}' ]]; then
-              echo "run_comps_matrix=empty"
-           else
-              echo "run_comps_matrix=$run_comps_matrix"
+           len=$(echo $run_comps_matrix | jq '.include | length')
+           if [[ "$len" == "0" ]]; then
+             run_comps_matrix="empty"
            fi
+
+           #if [[ "$run_comps_matrix" == '{"include":[]}' ]]; then
+           #   echo "run_comps_matrix=empty"
+           #else
+           #   echo "run_comps_matrix=$run_comps_matrix"
+           #fi
 
            echo "run_comps_matrix=$run_comps_matrix"
            echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
