@@ -2,35 +2,39 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "develop" ]
-  workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'     
-        required: true
-        default: 'warning'
+    branches: ["develop"]
+  pull_request:
+    branches: ["main"]
 
+env:
+  app-components: "app1, net-tools-api, notifications-api"
 
 jobs:
+  Determine-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run-comps-matrix: ${{steps.outputs.outputs.run_comps_matrix }}
+
+    steps:
+      - id: outputs
+        env:
+          _APP_COMPONENTS: ${{ env.app-components }}
+        run: |
+
+
+          run_comps_matrix="{\"include\":["
+          run_comps_matrix+="]}"
+          echo "run_comps_matrix=$run_comps_matrix"
+          echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
   call-workflow-passing-data:
-    uses: sschalasani/ci-cd-tools/.github/workflows/develop.yml@develop
-    with:
-      config-path: ".github/labeler.yml"
-      APP_NAME: {{ env.APP_NAME }}
-      ENV: {{ env.ENV_NAME }}
-      DEPLOY_TARGET: {{ env.DEPLOY_TARGET }}
-      DEPLOY_TARGET_TYPE: {{ env.DEPLOY_TARGET_TYPE }}
-      NEXUS_USERNAME: {{ secrets.NEXUS_USERNAME }}
-      NEXUS_PASSWORD: {{ secrets.NEXUS_PASSWORD }}
-      PLATFORM_USERNAME: {{ secrets.PLATFORM_USERNAME }}
-      PLATFORM_PASSWORD: {{ secrets.PLATFORM_PASSWORD }}
-      CONNECTED_APP_CLIENT_ID: {{ secrets.PLATFORM_USERNAME }}
-      CONNECTED_APP_CLIENT_SECRET: {{ secrets.PLATFORM_PASSWORD }}
-    secrets: inherit
-
-
-
-
-
-
-
+    runs-on: ubuntu-latest
+   # if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '' && needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}    
+    if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}  
+    strategy:
+      matrix: ${{ fromJson(needs.Determine-changes.outputs.run-comps-matrix) }}
+    steps:
+      - name:
+        env:
+          _APP_COMPONENTS: ${{ env.app-components }}
+        run: |
+          echo "$_APP_COMPONENTS"
