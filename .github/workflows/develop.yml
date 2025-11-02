@@ -38,7 +38,7 @@ jobs:
            read -ra components_to_run_through_dispatch <<< "${{ github.event.inputs.components-to-run-through-dispatch }}"
            read -ra app_components <<< "${_APP_COMPONENTS}"
 
-           run_comps_matrix="{\"include\": ["
+           run_comps_matrix='{"include":['
 
            for comp in "${app_components[@]}"; do
              echo "- $comp"
@@ -48,19 +48,20 @@ jobs:
                  run_comps_matrix+="{\"component-name\": \"$comp\"},"
               fi
              else
-               if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "${comp}/"; then
-                   run_comps_matrix+="{\"component-name\": \"$comp\"},"
+               # Only add component if a file changed under its directory
+               if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE "^${comp}/"; then
+                   run_comps_matrix+='{"component-name": "'"$comp"'"},'
                fi
              fi
            done
+           # Trim trailing comma (if any) and close JSON
+           json="${json%,}]"
 
-           if [[ "${run_comps_matrix: -1}" == "," ]]; then
-             run_comps_matrix=${run_comps_matrix::-1}
-           fi
-           run_comps_matrix+="]}"
-           len=$(echo $run_comps_matrix | jq '.include | length')
-           if [[ "$len" == "0" ]]; then
-             run_comps_matrix="empty"
+           # Emit "empty" when there are no components
+           if [[ "$json" == '{"include":[]}' ]]; then
+              echo "run_comps_matrix=empty"
+           else
+              echo "run_comps_matrix=$json"
            fi
 
            echo "run_comps_matrix=$run_comps_matrix"
