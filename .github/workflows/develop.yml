@@ -55,13 +55,13 @@ jobs:
              fi
            done
            # Trim trailing comma (if any) and close JSON
-           json="${json%,}]"
+           run_comps_matrix="${run_comps_matrix%,}]"
 
            # Emit "empty" when there are no components
-           if [[ "$json" == '{"include":[]}' ]]; then
+           if [[ "$run_comps_matrix" == '{"include":[]}' ]]; then
               echo "run_comps_matrix=empty"
            else
-              echo "run_comps_matrix=$json"
+              echo "run_comps_matrix=$run_comps_matrix"
            fi
 
            echo "run_comps_matrix=$run_comps_matrix"
