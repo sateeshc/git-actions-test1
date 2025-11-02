@@ -17,6 +17,7 @@ on:
         type: string
 env:
   app-components: "audit-scheduler-app,net-tools-api,notifications-api" 
+  app-name-map: '{"audit-scheduler-app":"audit-scheduler-prc-dev-v1","net-tools-api":"net-tools-api-dev-v1","notifications-api":"notifications-api-dev-v1"}'
 
 jobs:
   Determine-changes:
@@ -33,6 +34,7 @@ jobs:
        - id: outputs
          env:
            _APP_COMPONENTS: ${{ env.app-components }}
+           _APP_NAME_MAP: ${{ env.app-name-map }}
          run: |
            OLDIFS=$IFS
            IFS=","
@@ -44,15 +46,15 @@ jobs:
 
            for comp in "${app_components[@]}"; do
              echo "- $comp"
+             app_name=$(echo "$_APP_NAME_MAP" | jq -r --arg comp "$comp" '.[$comp]')
 
              if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-               if printf "%s\n" "${components_to_run_through_dispatch[@]}" | grep -qw "$comp"; then 
-                 run_comps_matrix+="{\"component-name\": \"$comp\"},"
-              fi
+               if printf "%s\n" "${components_to_run_through_dispatch[@]}" | grep -qw "$comp"; then
+                 run_comps_matrix+='{"component-name": "'"$comp"'","anypoint-application-name": "'"$app_name"'"},'
+               fi
              else
-               # Only add component if a file changed under its directory
                if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE "^${comp}/"; then
-                   run_comps_matrix+='{"component-name": "'"$comp"'"},'
+                 run_comps_matrix+='{"component-name": "'"$comp"'","anypoint-application-name": "'"$app_name"'"},'
                fi
              fi
            done
@@ -93,7 +95,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: List env
       env: 
-         anypoint_application_name: "${{ matrix.component-name }}-dev-v1"
+         anypoint_application_name: "${{ matrix.anypoint-application-name }}"
          project_root: "${{ matrix.component-name }}"
       run: |
          echo "Building the project $project_root"
