@@ -1,40 +1,92 @@
-name: Java CI with Maven
+
+name: Build and Deploy (DEV)
+run-name: build-and-deploy-to-dev (${{ github.event.workflow_run.head_branch || github.ref_name }})
+permissions: write-all
 
 on:
-  push:
-    branches: ["develop"]
-  pull_request:
-    branches: ["main"]
 
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+    inputs:
+      components-to-run-through-dispatch:
+        description: 'Comma separated list of components to build and deploy (audit-scheduler-app,net-tools-api,notifications-api)'
+        default: ""
+        required: true
+        type: string
 env:
-  app-components: "app1, net-tools-api, notifications-api"
+  app-components: "audit-scheduler-app,net-tools-api,notifications-api" 
 
 jobs:
   Determine-changes:
-    runs-on: ubuntu-latest
+    runs-on: arc
     outputs:
-      run-comps-matrix: ${{steps.outputs.outputs.run_comps_matrix }}
+      run-comps-matrix: ${{ steps.outputs.outputs.run_comps_matrix }}
 
     steps:
-      - id: outputs
-        env:
-          _APP_COMPONENTS: ${{ env.app-components }}
-        run: |
+       - name: Checkout Git Repository
+         uses: actions/checkout@v4
+         with:
+          fetch-depth: 0
 
+       - id: outputs
+         env:
+           _APP_COMPONENTS: ${{ env.app-components }}
+         run: |
+           IFS=","
+           read -ra components_to_run_through_dispatch <<< "${{ github.event.inputs.components-to-run-through-dispatch }}"
+           read -ra app_components <<< "${_APP_COMPONENTS}"
 
-          run_comps_matrix="{\"include\":["
-          run_comps_matrix+="]}"
-          echo "run_comps_matrix=$run_comps_matrix"
-          echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
-  call-workflow-passing-data:
-    runs-on: ubuntu-latest
-   # if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '' && needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}    
-    if: ${{ needs.Determine-changes.outputs.run-comps-matrix != '{"include":[]}' }}  
+           run_comps_matrix="{\"include\": ["
+
+           for comp in "${app_components[@]}"; do
+             echo "- $comp"
+
+             if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+               if printf "%s\n" "${components_to_run_through_dispatch[@]}" | grep -qw "$comp"; then 
+                 run_comps_matrix+="{\"component-name\": \"$comp\"},"
+              fi
+             else
+               if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "${comp}/"; then
+                   run_comps_matrix+="{\"component-name\": \"$comp\"},"
+               fi
+             fi
+           done
+
+           if [[ "${run_comps_matrix: -1}" == "," ]]; then
+             run_comps_matrix=${run_comps_matrix::-1}
+           fi
+           run_comps_matrix+="]}"
+           len=$(echo $run_comps_matrix | jq '.include | length')
+           if [[ "$len" == "0" ]]; then
+             run_comps_matrix="empty"
+           fi
+
+           echo "run_comps_matrix=$run_comps_matrix"
+           echo "run_comps_matrix=$run_comps_matrix" >> $GITHUB_OUTPUT
+
+  Build-and-Deploy:
+    needs: Determine-changes
+    permissions:
+      id-token: write
+      contents: read 
+      packages: write
+    if: ${{ needs.Determine-changes.outputs.run-comps-matrix != 'empty' }}
     strategy:
       matrix: ${{ fromJson(needs.Determine-changes.outputs.run-comps-matrix) }}
     steps:
-      - name:
-        env:
-          _APP_COMPONENTS: ${{ env.app-components }}
-        run: |
-          echo "$_APP_COMPONENTS"
+    - uses: actions/checkout@v4
+    - name: List env
+      env: 
+         anypoint-application-name: "${{ matrix.component-name }}-dev-v1"
+         project-root: "${{ matrix.component-name }}"
+      run: |
+         echo "Building the project $project-root"
+         echo "$anypoint-application-name"
+         echo "$project-root"
+
+
+
+
+      
