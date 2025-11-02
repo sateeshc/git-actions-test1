@@ -34,9 +34,11 @@ jobs:
          env:
            _APP_COMPONENTS: ${{ env.app-components }}
          run: |
+           OLDIFS=$IFS
            IFS=","
            read -ra components_to_run_through_dispatch <<< "${{ github.event.inputs.components-to-run-through-dispatch }}"
            read -ra app_components <<< "${_APP_COMPONENTS}"
+           IFS=$OLDIFS
 
            run_comps_matrix='{"include":['
 
